@@ -1,0 +1,23 @@
+# Build output
+build/
+app/build/
+.gradle/
+*.apk
+*.aab
+
+# Built releases. Deliberately NOT in git: each APK is ~15MB (387MB in total here), and every APK built
+# before 0.3.33 has the relay bearer token compiled into it — publishing them would leak the credential
+# the source no longer carries. Attach APKs to a GitHub Release instead.
+releases/
+dist/
+
+# Local machine config — holds sdk.dir AND the fp.node.* relay credentials (see app/build.gradle).
+local.properties
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+
+# Knowledge graph (regenerated locally; see the family CLAUDE.md)
+graphify-out/

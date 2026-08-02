@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AppCompat base (required by AppCompatActivity + BiometricPrompt). The app paints its own
+         colours programmatically via Theme.*; this only supplies an action-bar-less AppCompat window. -->
+    <style name="Theme.FreezePeach" parent="Theme.AppCompat.NoActionBar" />
+</resources>

@@ -1,0 +1,69 @@
+plugins {
+    id 'com.android.application'
+}
+
+// The default relay endpoint + bearer token are BUILD-TIME config, read from local.properties (which is
+// gitignored) — never hardcoded in source. They are credentials for a real node command proxy, so a
+// public checkout must not carry them. A clone without them simply builds an app with no preset node:
+// remoteNode() returns null and the wallet prompts for one (nodeConfigSheet).
+//
+//   fp.node.url=https://your-relay.example.org/cmd
+//   fp.node.token=<openssl rand -hex 32>
+def fpProps = new Properties()
+def fpPropsFile = rootProject.file('local.properties')
+if (fpPropsFile.exists()) { fpPropsFile.withInputStream { fpProps.load(it) } }
+
+android {
+    namespace 'com.eurobuddha.freezepeach'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.eurobuddha.freezepeach"
+        minSdk 28
+        targetSdk 34
+        versionCode 333
+        versionName "0.3.33"
+
+        buildConfigField 'String', 'DEFAULT_NODE_URL',
+                "\"${fpProps.getProperty('fp.node.url', '')}\""
+        buildConfigField 'String', 'DEFAULT_NODE_TOKEN',
+                "\"${fpProps.getProperty('fp.node.token', '')}\""
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    // Client-side end-to-end crypto: X25519 sealed box + Ed25519 (libsodium via Lazysodium).
+    implementation 'com.goterl:lazysodium-android:5.1.0@aar'
+    implementation 'net.java.dev.jna:jna:5.13.0@aar'
+    // SHA3-256 for the Minima seed derivation (matches minima-core's Crypto.hashData).
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
+    // QR generation for sharing your ID (scan instead of pasting 130 chars).
+    implementation 'com.google.zxing:core:3.5.3'
+    // QR camera scanning to add a contact by scanning their code.
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    // SVG token icons — BitmapFactory can't rasterise SVG, and many Minima tokens ship SVG icon urls.
+    implementation 'com.caverock:androidsvg-aar:1.4'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    // Vault unlock: BiometricPrompt (needs AppCompat/FragmentActivity) + ProcessLifecycleOwner for auto-lock.
+    implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'androidx.lifecycle:lifecycle-process:2.8.7'
+    // Off-device tests for the fund-critical logic (keyuses monotonicity, vault trust rules, key
+    // derivation). These classes are deliberately Android-free so they run on a plain JVM — no
+    // Robolectric, no emulator.
+    testImplementation 'junit:junit:4.13.2'
+}

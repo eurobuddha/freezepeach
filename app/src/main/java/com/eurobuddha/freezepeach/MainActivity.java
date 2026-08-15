@@ -124,6 +124,36 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     private EditText currentInput;         // active composer (to preserve a draft across drain re-renders)
     private LinearLayout root;
 
+    /**
+     * FreezePeach's chat relay (MaxLite / relay.privateprivate.org) is being
+     * retired in favour of Maxima — the same messaging, but decentralised and
+     * hosted by its users, no central relay to trust or lose. Nudge the user
+     * once; the app keeps working until the relay is frozen.
+     */
+    private void maybeShowMaximaNotice() {
+        try {
+            if (prefs.getBoolean("maxima_notice_shown", false)) return;
+            prefs.edit().putBoolean("maxima_notice_shown", true).apply();
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("FreezePeach is moving to Maxima")
+                    .setMessage("Your messages travel over a central relay today. We're moving to "
+                            + "Maxima: the same private chat, but 100% hosted by its users — no "
+                            + "central server to trust, censor or shut down.\n\n"
+                            + "Install the Maxima app to carry on with a network no one can switch off. "
+                            + "This app keeps working for now.")
+                    .setPositiveButton("Get Maxima", (d, w) -> {
+                        try {
+                            startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,
+                                    android.net.Uri.parse("https://github.com/eurobuddha/maxima/releases")));
+                        } catch (Exception ignored) {
+                        }
+                    })
+                    .setNegativeButton("Later", null)
+                    .show();
+        } catch (Exception ignored) {
+        }
+    }
+
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
         prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
@@ -137,6 +167,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         applyStatusBar();
         createNotifChannel();
         requestNotifPermission();
+        maybeShowMaximaNotice();
 
         session = com.eurobuddha.wallet.WalletSession.get(this);
         vault = session.vault();

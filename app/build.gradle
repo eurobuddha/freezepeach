@@ -51,6 +51,9 @@ dependencies {
     implementation 'com.goterl:lazysodium-android:5.1.0@aar'
     implementation 'net.java.dev.jna:jna:5.13.0@aar'
     // SHA3-256 for the Minima seed derivation (matches minima-core's Crypto.hashData).
+    // PINNED, do not upgrade: the vendored Winternitz signer needs
+    // org.bouncycastle.pqc.crypto.gmss.util, REMOVED in BC 1.71+ (every jdk18on
+    // release). Same pin as apks/wallet, maxima and minima-core itself.
     implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
     // QR generation for sharing your ID (scan instead of pasting 130 chars).
     implementation 'com.google.zxing:core:3.5.3'
